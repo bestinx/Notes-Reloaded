@@ -1,10 +1,12 @@
 package com.chaosthedude.notes.gui;
 
-import javax.annotation.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import com.chaosthedude.notes.Notes;
+import com.chaosthedude.notes.config.NotesConfig;
 import com.chaosthedude.notes.note.Note;
 import com.chaosthedude.notes.note.Scope;
+import com.chaosthedude.notes.util.RenderUtils;
 import com.chaosthedude.notes.util.StringUtils;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -33,8 +35,10 @@ public class EditNoteScreen extends Screen {
 	private Scope scope;
 	private boolean pinned;
 	private boolean setTextFieldFocused;
+	private String originalTitle;
+	private String originalText;
 
-	public EditNoteScreen(Screen parentScreen, @Nullable Note note) {
+	public EditNoteScreen(Screen parentScreen, Note note) {
 		super(Component.literal(note != null ? I18n.get("notes.editNote") : I18n.get("notes.newNote")));
 		this.parentScreen = parentScreen;
 		if (note != null) {
@@ -45,7 +49,7 @@ public class EditNoteScreen extends Screen {
 			newNote = true;
 		}
 
-		scope = this.note.getScope();
+		scope = Scope.getCurrentScope();
 		pinned = this.note.isPinned();
 		setTextFieldFocused = false;
 	}
@@ -74,15 +78,27 @@ public class EditNoteScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
+		if ((event.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0 && event.key() == GLFW.GLFW_KEY_S) {
+			// Ctrl+S: save and open the viewer
+			saveAndOpen();
+			return true;
+		}
+
+		if (event.key() == GLFW.GLFW_KEY_ENTER && noteTitleField.isFocused()) {
+			// Enter in the title field jumps to the text field
+			setFocused(noteTextField);
+			return true;
+		}
+
 		boolean ret = super.keyPressed(event);
-		updateNoteText();
+		updateNote();
 		return ret;
 	}
 
 	@Override
 	public boolean charTyped(CharacterEvent event) {
 		boolean ret = super.charTyped(event);
-		updateNoteText();
+		updateNote();
 		return ret;
 	}
 
@@ -95,23 +111,41 @@ public class EditNoteScreen extends Screen {
 	}
 
 	@Override
+	public void onClose() {
+		// ESC: confirm discarding unsaved changes instead of silently losing them
+		if (isDirty() && NotesConfig.confirmUnsavedChanges) {
+			confirmDiscard();
+		} else {
+			minecraft.gui.setScreen(parentScreen);
+		}
+	}
+
+	@Override
+	public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+		super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+		RenderUtils.renderWindow(guiGraphics, width, height);
+	}
+
+	@Override
 	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
-		guiGraphics.centeredText(font, title.getString(), width / 2 + 60, 15, 0xffffffff);
-		guiGraphics.centeredText(font, I18n.get("notes.saveAs", note.getUncollidingSaveName(note.getTitle())), width / 2 + 55, 65, 0xffaaaaaa);
+		RenderUtils.renderHeader(guiGraphics, font, title.getString(), width / 2 + 60, 15, Math.min(150, width / 3));
+		guiGraphics.centeredText(font, I18n.get("notes.saveAs", note.getUncollidingSaveName(note.getTitle())), width / 2 + 55, 29, RenderUtils.TEXT_MUTED);
+		if (isDirty()) {
+			guiGraphics.text(font, "•", 6, 6, RenderUtils.accent(), true);
+		}
+
+		// Editor status bar: line and character count
+		final String text = noteTextField.getValue();
+		final int lineCount = text.isEmpty() ? 0 : text.split("\n").length;
+		RenderUtils.drawRightAligned(font, guiGraphics, I18n.get("notes.editorStats", lineCount, text.length()), width - 10, height - 12, RenderUtils.TEXT_MUTED);
 	}
 
 	private void setupButtons() {
 		saveButton = addRenderableWidget(new NotesButton(10, 40, 110, 20, Component.translatable("notes.save"), (onPress) -> {
-			updateNoteText();
-			note.setScope(scope);
-			note.save();
-			minecraft.gui.setScreen(new ViewNoteScreen(parentScreen, note));
-			if (pinned) {
-				Notes.pinnedNote = note;
-			}
+			saveAndOpen();
 		}));
-		globalButton = addRenderableWidget(new NotesButton(10, 65, 110, 20, Component.translatable("notes.global").append(Component.literal(": ").append(scope == Scope.GLOBAL ? Component.translatable("notes.on") : Component.translatable("notes.off"))), (onPress) -> {
+		globalButton = addRenderableWidget(new NotesButton(10, 65, 110, 20, Component.translatable("notes.global").append(Component.literal(": ").append(note.getScope() == Scope.GLOBAL ? Component.translatable("notes.on") : Component.translatable("notes.off"))), (onPress) -> {
 			if (scope == Scope.GLOBAL) {
 				scope = Scope.getCurrentScope();
 			} else {
@@ -119,6 +153,7 @@ public class EditNoteScreen extends Screen {
 			}
 
 			globalButton.setMessage(Component.literal(I18n.get("notes.global") + (scope == Scope.GLOBAL ? ": " + I18n.get("notes.on") : ": " + I18n.get("notes.off"))));
+			updateNote();
 		}));
 		insertBiomeButton = addRenderableWidget(new NotesButton(10, 100, 110, 20, Component.translatable("notes.biome"), (onPress) -> {
 			insertBiome();
@@ -133,7 +168,7 @@ public class EditNoteScreen extends Screen {
 			setTextFieldFocused = true;
 		}));
 		cancelButton = addRenderableWidget(new NotesButton(10, height - 30, 110, 20, Component.translatable("gui.cancel"), (onPress) -> {
-			minecraft.gui.setScreen(parentScreen);
+			onClose();
 		}));
 
 		insertBiomeButton.active = false;
@@ -148,17 +183,55 @@ public class EditNoteScreen extends Screen {
 			setFocused(noteTitleField);
 		}
 
-		noteTextField = addRenderableWidget(new NotesTextField(font, 130, 85, width - 140, height - 95));
+		noteTextField = addRenderableWidget(new NotesTextField(font, 130, 70, width - 140, height - 82));
 		noteTextField.setValue(note.getFilteredText());
 		noteTextField.setScrollAmount(0);
 		if (!newNote) {
 			setFocused(noteTextField);
 		}
+
+		originalTitle = note.getTitle();
+		originalText = note.getFilteredText();
 	}
 
-	private void updateNoteText() {
+	private boolean isDirty() {
+		if (noteTitleField == null || noteTextField == null) {
+			return false;
+		}
+
+		return !noteTitleField.getValue().equals(originalTitle) || !noteTextField.getValue().equals(originalText);
+	}
+
+	private void confirmDiscard() {
+		minecraft.gui.setScreen(new NotesConfirmScreen((result) -> {
+			if (result) {
+				if (newNote) {
+					// Nothing was written to disk for a new note, just drop it
+					minecraft.gui.setScreen(parentScreen);
+				} else {
+					// Restore the on-disk content
+					note.update();
+					minecraft.gui.setScreen(parentScreen);
+				}
+			} else {
+				minecraft.gui.setScreen(this);
+			}
+		}, Component.translatable("notes.discardChanges"), Component.translatable("notes.discardHint")));
+	}
+
+	private void saveAndOpen() {
+		updateNote();
+		note.save();
+		minecraft.gui.setScreen(new ViewNoteScreen(parentScreen, note));
+		if (pinned) {
+			note.pin();
+		}
+	}
+
+	private void updateNote() {
 		note.setTitle(noteTitleField.getValue());
 		note.setText(noteTextField.getValue());
+		note.setScope(scope);
 	}
 
 	private void insertBiome() {

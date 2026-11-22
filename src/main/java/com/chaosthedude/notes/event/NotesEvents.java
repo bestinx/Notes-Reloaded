@@ -15,23 +15,24 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 public class NotesEvents {
-	
+
 	private static final Minecraft CLIENT = Minecraft.getInstance();
-	
+
 	public static final KeyMapping.Category NOTES_CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Notes.MODID, "keys"));
-	public  static final KeyMapping OPEN_NOTES = new KeyMapping("key.openNotes", GLFW.GLFW_KEY_N, NOTES_CATEGORY);
+	public static final KeyMapping OPEN_NOTES = new KeyMapping("key.openNotes", GLFW.GLFW_KEY_N, NOTES_CATEGORY);
 
 	public static void registerOverlay(RegisterGuiLayersEvent event) {
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, Identifier.fromNamespaceAndPath(Notes.MODID, "pinned_note"), new PinnedNoteLayer());
 	}
 
-    public static void registerKeybinds(RegisterKeyMappingsEvent event) {
-    	event.registerCategory(NOTES_CATEGORY);
-        event.register(OPEN_NOTES);
-    }
+	public static void registerKeybinds(RegisterKeyMappingsEvent event) {
+		event.registerCategory(NOTES_CATEGORY);
+		event.register(OPEN_NOTES);
+	}
 
 	public static void onClientTick(ClientTickEvent.Pre event) {
-		if (OPEN_NOTES.isDown()) {
+		// Consume all queued presses so holding the key does not spam screen changes
+		while (OPEN_NOTES.consumeClick()) {
 			CLIENT.gui.setScreen(new SelectNoteScreen(CLIENT.gui.screen()));
 		}
 	}

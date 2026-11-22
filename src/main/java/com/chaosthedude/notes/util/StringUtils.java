@@ -18,15 +18,15 @@ import net.minecraft.world.level.biome.Biome;
 public final class StringUtils {
 
 	public static final char[] FILTER_CHARS = new char[] { '\r', '\f' };
-	private static final Minecraft mc = Minecraft.getInstance();
-	private static final Font font = mc.font;
+	private static final Minecraft CLIENT = Minecraft.getInstance();
+	private static final Font FONT = CLIENT.font;
 
 	public static List<String> wrapToWidth(String str, int wrapWidth) {
 		final List<String> strings = new ArrayList<String>();
 		String temp = "";
 		for (int i = 0; i < str.length(); i++) {
 			char c = str.charAt(i);
-			if (c == '\n' || font.width(temp + String.valueOf(c)) >= wrapWidth) {
+			if (c == '\n' || FONT.width(temp + String.valueOf(c)) >= wrapWidth) {
 				strings.add(temp);
 				temp = "";
 			}
@@ -59,10 +59,10 @@ public final class StringUtils {
 		return filtered;
 	}
 
-	public static String fixBiomeName(Level world, Biome biome) {
-		Optional<Identifier> optionalKey = getKeyForBiome(world, biome);
-		if (optionalKey.isPresent()) {
-			final String original = I18n.get(Util.makeDescriptionId("biome", optionalKey.get()));
+	public static String fixBiomeName(Level level, Biome biome) {
+		final Optional<Identifier> optionalID = getKeyForBiome(level, biome);
+		if (optionalID.isPresent()) {
+			final String original = I18n.get(Util.makeDescriptionId("biome", optionalID.get()));
 			String fixed = "";
 			char pre = ' ';
 			for (int i = 0; i < original.length(); i++) {
@@ -75,7 +75,7 @@ public final class StringUtils {
 			}
 			return fixed;
 		}
-
+		
 		return "";
 	}
 	
