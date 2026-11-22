@@ -6,7 +6,6 @@ import com.chaosthedude.notes.util.FileUtils;
 import com.chaosthedude.notes.util.StringUtils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.world.level.storage.LevelResource;
 
 public class Scope {
@@ -14,6 +13,10 @@ public class Scope {
 	private static final Minecraft mc = Minecraft.getInstance();
 
 	public static final Scope GLOBAL = new Scope("notes.scope.global", "global") {
+		@Override
+		public boolean isActive() {
+			return true;
+		}
 	};
 
 	public static final Scope LOCAL = new Scope("notes.scope.local", "local") {
@@ -26,19 +29,29 @@ public class Scope {
 
 			return saveDirFile;
 		}
-	};
 
-	public static final Scope REMOTE = new Scope("notes.scope.remote", "remote") {
 		@Override
-		public File getCurrentSaveDirectory() {
-			final File saveDirFile = new File(getRootSaveDirectory(), getServerID());
-			if (!saveDirFile.exists()) {
-				saveDirFile.mkdirs();
-			}
-
-			return saveDirFile;
+		public boolean isActive() {
+			return isLocal();
 		}
 	};
+
+		public static final Scope REMOTE = new Scope("notes.scope.remote", "remote") {
+			@Override
+			public File getCurrentSaveDirectory() {
+				final File saveDirFile = new File(getRootSaveDirectory(), getServerIP());
+				if (!saveDirFile.exists()) {
+					saveDirFile.mkdirs();
+				}
+
+				return saveDirFile;
+			}
+
+			@Override
+			public boolean isActive() {
+				return isRemote();
+			}
+		};
 
 	private String unlocName;
 	private String saveDir;
@@ -63,6 +76,10 @@ public class Scope {
 		}
 
 		return saveDirFile;
+	}
+
+	public boolean isActive() {
+		return false;
 	}
 
 	public static Scope getCurrentScope() {
@@ -101,14 +118,9 @@ public class Scope {
 		return mc.getCurrentServer() != null;
 	}
 
-	public static String getServerID() {
+	public static String getServerIP() {
 		if (isRemote()) {
-			final ServerData server = mc.getCurrentServer();
-			if (server.type() == ServerData.Type.REALM || server.type() == ServerData.Type.LAN) {
-				// Realms can rotate IPs, and LAN ports are random, so use server name instead of IP
-				return StringUtils.filterFileName(server.name);
-			}
-			return StringUtils.filterFileName(server.ip);
+			return StringUtils.filterFileName(mc.getCurrentServer().ip);
 		}
 
 		return null;

@@ -2,21 +2,18 @@
   "schemaVersion": 1,
   "id": "notes",
   "version": "${version}",
-
-  "name": "Notes",
-  "description": "Clientside in-game notepad.",
+  "name": "Notes Reloaded",
+  "description": "Clientside in-game notepad. Revived fork: scrollable viewer, search, in-game settings, unsaved-change protection and a refreshed UI.",
   "authors": [
-    "ChaosTheDude"
+    "ChaosTheDude",
+    "Notes Reloaded fork"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/notes",
     "sources": "https://github.com/MattCzyr/Note"
   },
-
   "license": "CC BY-NC-SA 4.0",
-
   "accessWidener": "notes.accesswidener",
-
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -26,7 +23,6 @@
   "mixins": [
     "notes.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
