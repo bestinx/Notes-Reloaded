@@ -4,6 +4,18 @@
 
 > Made with permission to revive the mod. All original notes (`.txt` files in the `notes` folder) and the config stay fully compatible — same mod id, same file formats.
 
+## Downloads
+
+| Minecraft | Loader | Download |
+| --- | --- | --- |
+| 1.21.11 | Fabric | [notes-1.21.11-2.5.0-fabric.jar](https://github.com/bestinx/Notes-Reloaded/releases/download/v2.5.0/notes-1.21.11-2.5.0-fabric.jar) |
+| 26.1 | Fabric | [notes-26.1-2.5.0-fabric.jar](https://github.com/bestinx/Notes-Reloaded/releases/download/v2.5.0/notes-26.1-2.5.0-fabric.jar) |
+| 26.1 | NeoForge | [notes-26.1-2.5.0-neoforge.jar](https://github.com/bestinx/Notes-Reloaded/releases/download/v2.5.0/notes-26.1-2.5.0-neoforge.jar) |
+| 26.2 | Fabric | [notes-26.2-2.5.0-fabric.jar](https://github.com/bestinx/Notes-Reloaded/releases/download/v2.5.0/notes-26.2-2.5.0-fabric.jar) |
+| 26.2 | NeoForge | [notes-26.2-2.5.0-neoforge.jar](https://github.com/bestinx/Notes-Reloaded/releases/download/v2.5.0/notes-26.2-2.5.0-neoforge.jar) |
+
+All jars are attached to the [v2.5.0 release](https://github.com/bestinx/Notes-Reloaded/releases/tag/v2.5.0). The ModMenu settings integration is available on Fabric builds.
+
 ## Features
 
 ### Reader
