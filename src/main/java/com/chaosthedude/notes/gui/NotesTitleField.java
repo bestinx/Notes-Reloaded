@@ -20,9 +20,10 @@ public class NotesTitleField extends EditBox {
 
 	@Override
 	public void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		if (isVisible()) {
-			int fillColor = RenderUtils.getBackgroundColor(isActive(), false);
-			guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), fillColor);
+		if (visible) {
+			// Card-style field: accent border while focused
+			guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), RenderUtils.WIDGET_BG);
+			RenderUtils.renderAccentBorder(guiGraphics, getX(), getY(), getWidth(), getHeight(), isFocused() ? RenderUtils.accent() : RenderUtils.WIDGET_BORDER);
 		}
 
 		// Disable bordered to skip rendering the default background

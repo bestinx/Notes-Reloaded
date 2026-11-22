@@ -29,7 +29,6 @@ import net.minecraft.client.resources.language.I18n;
 
 public class Note {
 
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(NotesConfig.dateFormat);
 	private static final Font FONT = Minecraft.getInstance().font;
 
 	private String title;
@@ -38,6 +37,24 @@ public class Note {
 	private File prevSaveFile;
 	private File saveFile;
 	private File saveDir;
+	private static DateTimeFormatter dateFormatter;
+	private static String dateFormatterPattern;
+
+	private static DateTimeFormatter getDateFormatter() {
+		if (dateFormatter == null || !NotesConfig.dateFormat.equals(dateFormatterPattern)) {
+			dateFormatterPattern = NotesConfig.dateFormat;
+			DateTimeFormatter formatter;
+			try {
+				formatter = DateTimeFormatter.ofPattern(NotesConfig.dateFormat);
+			} catch (Exception e) {
+				Notes.LOGGER.error("Invalid date format in config: " + NotesConfig.dateFormat + ", falling back to default", e);
+				formatter = DateTimeFormatter.ofPattern(NotesConfig.DEFAULT_DATE_FORMAT);
+			}
+			dateFormatter = formatter;
+		}
+
+		return dateFormatter;
+	}
 
 	public Note(String title, String text, Scope scope) {
 		this.title = title;
@@ -132,7 +149,7 @@ public class Note {
 
 	public String getLastModifiedString() {
 		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getLastModified()), ZoneId.systemDefault());
-		return I18n.get("notes.lastModified") + ": " + DATE_FORMATTER.format(zonedDateTime);
+		return I18n.get("notes.lastModified") + ": " + getDateFormatter().format(zonedDateTime);
 	}
 
 	public String getUncollidingSaveName(String name) {
@@ -149,12 +166,12 @@ public class Note {
 	}
 
 	public String getSaveName() {
-		String saveDirName = title.trim();
+		String saveDirName = title == null ? "" : title.trim();
 		for (char c : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
 			saveDirName = saveDirName.replace(c, '_');
 		}
 
-		if (saveDirName == null || saveDirName.isEmpty()) {
+		if (saveDirName.isEmpty()) {
 			saveDirName = "New Note";
 		}
 
@@ -166,7 +183,6 @@ public class Note {
 	}
 
 	public void save() {
-		BufferedWriter writer = null;
 		try {
 			prevSaveFile.delete();
 
@@ -174,16 +190,11 @@ public class Note {
 				saveFile.getParentFile().mkdirs();
 			}
 
-			writer = new BufferedWriter(new FileWriter(saveFile));
-			writer.write(rawText);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				writer.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
+				writer.write(rawText);
 			}
+		} catch (Exception e) {
+			Notes.LOGGER.error("Failed to save note: " + getTitle(), e);
 		}
 	}
 
@@ -205,11 +216,19 @@ public class Note {
 	}
 
 	public void delete() {
-		if (isPinned()) {
-			Notes.pinnedNote = null;
-		}
-
+		unpin();
 		saveFile.delete();
+	}
+
+	// Multiple notes may be pinned at once; they stack vertically on the HUD
+	public void pin() {
+		if (!isPinned()) {
+			Notes.pinnedNotes.add(this);
+		}
+	}
+
+	public void unpin() {
+		Notes.pinnedNotes.removeIf(note -> equals(note));
 	}
 
 	public void catchNullScope() {
@@ -221,9 +240,7 @@ public class Note {
 	public void update(File file) {
 		title = FileUtils.getFileName(file);
 		scope = Scope.getScopeFromParentFile(file.getParentFile());
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(file));
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			final StringBuilder builder = new StringBuilder();
 			String line = reader.readLine();
 			while (line != null) {
@@ -233,13 +250,8 @@ public class Note {
 			}
 			rawText = builder.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Notes.LOGGER.error("Failed to load note: " + file.getName(), e);
+			rawText = "";
 		}
 
 		saveFile = file;
@@ -259,7 +271,13 @@ public class Note {
 	}
 
 	public boolean isPinned() {
-		return equals(Notes.pinnedNote);
+		for (Note pinned : Notes.pinnedNotes) {
+			if (equals(pinned)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public boolean isValidScope() {

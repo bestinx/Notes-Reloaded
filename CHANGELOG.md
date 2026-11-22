@@ -1,34 +1,43 @@
-## Version 3.2.0
-### NeoForge 26.2
-- Updated to NeoForge 26.2
-- Fixed global notes changing to local after saving
-- Fixed local notes on LAN or realms servers sometimes not persisting between sessions
-- Added Tatar translations
+## Version 2.5.0 (Notes Reloaded fork)
+### Fabric 1.21.11
+- Complete visual redesign, no longer sharing the original mod's flat look: graphite window cards with crisp borders, drop shadows and a themed accent strip on top; card-style buttons, text fields, sliders and list rows; accent underline on hovered buttons and accent borders on focused fields
 
-## Version 2.3.0
-### Fabric 26.2
-- Updated to Fabric 26.2
-- Fixed global notes changing to local after saving
-- Fixed local notes on LAN or realms servers sometimes not persisting between sessions
-- Added Tatar translations
+## Version 2.4.0 (Notes Reloaded fork)
+### Fabric 1.21.11
+- Markdown-lite highlighting in the viewer: # headers (theme header color, underlined), **bold** (accent), *italic* and `code` (gray); markers stay visible so displayed text and copied text always match; toggle in settings
+- Multiple notes can be pinned at once; they stack vertically on the HUD
+- Pinned note background opacity slider in settings
+- Note list sorting: newest/oldest/A-Z/Z-A via a button next to the search field (persisted)
 
-## Version 3.1.0
-### NeoForge 26.1
-- Updated to NeoForge 26.1
-- Fixed various issues with the note edit box
-- Pinned notes will now always stay at the top of the notes list
-- Added Turkish translations
+## Version 2.3.1 (Notes Reloaded fork)
+### Fabric 1.21.11
+- Theme picker: visual swatch panel in settings (click a color to switch instantly) instead of a cycling text button
+- ModMenu integration: a settings gear now appears on the Notes entry in the mod list
 
-## Version 2.2.0
-### Fabric 26.1
-- Updated to Fabric 26.1
-- Fixed various issues with the note edit box
-- Pinned notes will now always stay at the top of the notes list
-- Added Turkish translations
+## Version 2.3.0 (Notes Reloaded fork)
+### Fabric 1.21.11
+- Text selection in the note viewer: drag to select, double click to select a word, Ctrl+A selects all, Ctrl+C copies; the copy button copies the selection when present (soft line wraps are joined back together when copying)
+- Six UI themes (amber, sky, mint, rose, lavender, mono) with a new Theme setting; the pinned note HUD border follows the theme
+- Settings screen layout reworked: wider widgets, shorter labels, date format label above its field, validity hint under it, slider handle no longer covers the label
+- Minor: thinner slider handle with progress bar, cleaner positioning dialog
+
+## Version 2.2.0 (Notes Reloaded fork)
+### Fabric 1.21.11
+- Note viewer now scrolls freely with the mouse wheel, a draggable scrollbar, and keyboard shortcuts (Up/Down/PageUp/PageDown/Home/End) instead of page-flipping only; legacy page mode is still available in settings
+- New in-game settings screen (gear from the note list): pinned note position/width/height, scrollable viewer, word wrap, in-game editor/viewer, unsaved-change confirmation, date format, open notes folder, reset to defaults
+- Search bar in the note selection screen filters notes by title and content
+- "Copy Text" button copies a note to the clipboard
+- Ctrl+S saves a note from the editor; Enter in the title field jumps to the text editor
+- Unsaved changes are now protected: canceling/ESC asks for confirmation and marks the editor with a "dirty" indicator
+- Editor status bar with line and character counts
+- Refreshed flat UI: accent highlights on hover/selection, header underline, hover highlight in the note list, note count display
+- Corrupted config no longer crashes the game: it is backed up as notes.json.broken and recreated with defaults
+- Fixed REMOTE scope reporting itself as active in singleplayer
+- Fixed invalid date format in config crashing timestamps (falls back to default)
+- Misc robustness fixes (resource handling, null-safe config loading with sane clamping)
 
 ## Version 3.0.1
-### NeoForge 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21
-- Updated to NeoForge 1.21.11
+### NeoForge 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21
 - Updated to NeoForge 1.21.10
 - Updated to NeoForge 1.21.8
 - Updated to NeoForge 1.21.7
@@ -41,8 +50,7 @@
 - Fixed bug that caused local notes to be saved globally
 
 ## Version 2.1.1
-### Fabric 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21
-- Updated to Fabric 1.21.11
+### Fabric 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21
 - Updated to Fabric 1.21.10
 - Updated to Fabric 1.21.8
 - Updated to Fabric 1.21.7
