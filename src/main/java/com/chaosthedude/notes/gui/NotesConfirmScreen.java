@@ -1,6 +1,9 @@
 package com.chaosthedude.notes.gui;
 
+import com.chaosthedude.notes.util.RenderUtils;
+
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
@@ -9,6 +12,12 @@ public class NotesConfirmScreen extends ConfirmScreen {
 
 	public NotesConfirmScreen(BooleanConsumer callbackFunction, Component title, Component subtitle) {
 		super(callbackFunction, title, subtitle);
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+		super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+		RenderUtils.renderWindow(guiGraphics, width, height);
 	}
 
 	@Override

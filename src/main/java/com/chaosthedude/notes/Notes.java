@@ -1,5 +1,8 @@
 package com.chaosthedude.notes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -20,7 +23,8 @@ public class Notes implements ClientModInitializer {
 
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-	public static Note pinnedNote;
+	// Multiple notes can be pinned at once; they stack on the HUD
+	public static final List<Note> pinnedNotes = new ArrayList<Note>();
 
 	private static KeyMapping openNotes;
 

@@ -1,5 +1,7 @@
 package com.chaosthedude.notes.gui;
 
+import com.chaosthedude.notes.util.RenderUtils;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -15,17 +17,19 @@ public class NotesButton extends Button {
 	public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (visible) {
 			Minecraft mc = Minecraft.getInstance();
-			float state = 2;
-			if (!active) {
-				state = 5;
-			} else if (isHovered) {
-				state = 4;
-			}
-			final float f = state / 2 * 0.9F + 0.1F;
-			final int color = (int) (255.0F * f);
 
-			guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), color / 2 << 24);
-			guiGraphics.drawCenteredString(mc.font, getMessage(), getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, 0xffffffff);
+			// Card-style button: graphite fill, crisp border, accent highlight on hover
+			final int fill = !active ? RenderUtils.WIDGET_BG_DISABLED : isHovered ? RenderUtils.WIDGET_BG_HOVER : RenderUtils.WIDGET_BG;
+			guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), fill);
+			if (active && isHovered) {
+				RenderUtils.renderAccentBorder(guiGraphics, getX(), getY(), getWidth(), getHeight());
+				// Accent underline strip along the bottom edge
+				guiGraphics.fill(getX() + 1, getY() + getHeight() - 3, getX() + getWidth() - 1, getY() + getHeight() - 1, RenderUtils.accentDim());
+			} else {
+				RenderUtils.renderAccentBorder(guiGraphics, getX(), getY(), getWidth(), getHeight(), RenderUtils.WIDGET_BORDER);
+			}
+
+			guiGraphics.drawCenteredString(mc.font, getMessage(), getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, active ? 0xffffffff : RenderUtils.TEXT_DISABLED);
 		}
 	}
 

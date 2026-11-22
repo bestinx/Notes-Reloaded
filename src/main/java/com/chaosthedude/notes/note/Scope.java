@@ -36,22 +36,22 @@ public class Scope {
 		}
 	};
 
-	public static final Scope REMOTE = new Scope("notes.scope.remote", "remote") {
-		@Override
-		public File getCurrentSaveDirectory() {
-			final File saveDirFile = new File(getRootSaveDirectory(), getServerIP());
-			if (!saveDirFile.exists()) {
-				saveDirFile.mkdirs();
+		public static final Scope REMOTE = new Scope("notes.scope.remote", "remote") {
+			@Override
+			public File getCurrentSaveDirectory() {
+				final File saveDirFile = new File(getRootSaveDirectory(), getServerIP());
+				if (!saveDirFile.exists()) {
+					saveDirFile.mkdirs();
+				}
+
+				return saveDirFile;
 			}
 
-			return saveDirFile;
-		}
-
-		@Override
-		public boolean isActive() {
-			return isLocal();
-		}
-	};
+			@Override
+			public boolean isActive() {
+				return isRemote();
+			}
+		};
 
 	private String unlocName;
 	private String saveDir;
