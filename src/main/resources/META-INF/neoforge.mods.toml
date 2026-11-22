@@ -4,11 +4,12 @@ license="CC BY-NC-SA 4.0"
 [[mods]]
     modId="notes"
     version="${mod_version}"
-    displayName="Notes"
+    displayName="Notes Reloaded"
     displayURL="https://www.curseforge.com/minecraft/mc-mods/notes"
-    authors="ChaosTheDude"
+    authors="ChaosTheDude, Notes Reloaded fork"
     description='''
-    Clientside in-game notepad.
+    Clientside in-game notepad. Revived fork: scrollable viewer, search, in-game
+    settings, unsaved-change protection and a refreshed UI.
     '''
 
 [[dependencies.notes]]

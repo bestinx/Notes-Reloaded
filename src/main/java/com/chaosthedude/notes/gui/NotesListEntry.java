@@ -1,7 +1,7 @@
 package com.chaosthedude.notes.gui;
 
 import com.chaosthedude.notes.Notes;
-import com.chaosthedude.notes.config.ConfigHandler;
+import com.chaosthedude.notes.config.NotesConfig;
 import com.chaosthedude.notes.note.Note;
 
 import net.minecraft.client.Minecraft;
@@ -25,18 +25,18 @@ public class NotesListEntry extends ObjectSelectionList.Entry<NotesListEntry> {
 		parentScreen = notesList.getParentScreen();
 		mc = Minecraft.getInstance();
 	}
-	
+
 	@Override
 	public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
 		Component titleComponent = Component.literal(note.getTitle());
 		Component scopeComponent = Component.literal(" (").withColor(0xff808080).append(Component.translatable(note.getScope().getUnlocalizedName()).withColor(0xff808080).append(Component.literal(") ").withColor(0xff808080)));
 		Component pinnedComponent = note.isPinned() ? Component.translatable("notes.pinned") : Component.empty();
-		
+
 		guiGraphics.text(mc.font, Component.empty().append(titleComponent).append(scopeComponent).append(pinnedComponent), getX() + 5, getY() + 5, 0xffffffff);
 		guiGraphics.text(mc.font, note.getPreview(notesList.getRowWidth() - 10), getX() + 5, getY() + 5 + (mc.font.lineHeight + 2), 0xff808080);
 		guiGraphics.text(mc.font, note.getLastModifiedString(), getX() + 5, getY() + 5 + ((mc.font.lineHeight + 2) * 2), 0xff808080);
 	}
-	
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		notesList.selectNote(this);
@@ -47,7 +47,7 @@ public class NotesListEntry extends ObjectSelectionList.Entry<NotesListEntry> {
 	}
 
 	public void editNote() {
-		if (ConfigHandler.CLIENT.useInGameEditor.get() || !note.tryOpenExternal()) {
+		if (NotesConfig.useInGameEditor || !note.tryOpenExternal()) {
 			mc.setScreen(new EditNoteScreen(parentScreen, note));
 		}
 	}
@@ -59,24 +59,24 @@ public class NotesListEntry extends ObjectSelectionList.Entry<NotesListEntry> {
 
 	public void loadNote() {
 		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-		if (ConfigHandler.CLIENT.useInGameViewer.get() || !note.tryOpenExternal()) {
+		if (NotesConfig.useInGameViewer || !note.tryOpenExternal()) {
 			mc.setScreen(new ViewNoteScreen(parentScreen, note));
 		}
 	}
 
 	public void togglePin() {
 		if (isPinned()) {
-			Notes.pinnedNote = null;
+			note.unpin();
 		} else {
-			Notes.pinnedNote = note;
+			note.pin();
 			mc.setScreen(null);
 		}
 	}
 
 	public boolean isPinned() {
-		return note.equals(Notes.pinnedNote);
+		return note.isPinned();
 	}
-	
+
 	public Note getNote() {
 		return note;
 	}
